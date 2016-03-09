@@ -1,5 +1,5 @@
 # BBS5
-# License: [http://www.gnu.org/licenses/agpl-3*0*en*html]
+# License: [http://www.gnu.org/licenses/agpl-3.0.en.html]
 # Author: Mario McGinley
 ## To be Completed:
 *** Migrate nonblocking*py from pulsar to asyncio
