@@ -1,0 +1,251 @@
+<html>
+  <head>
+    <title>Pope5: Python Object Publishing Environment HTML5</title>
+    <script src="/static/js/jquery-1.11.3.min.js"></script>
+    <script src="/static/js/jquery-ui.min.js"></script>
+    <script src="/static/js/html2canvas.js"></script>
+    <script src="/static/js/jquery.debug.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/css/jquery-ui.theme.min.css"/>
+    <style>
+      @font-face {
+        font-family: Alexis;
+        src: url("/static/fonts/alexisv3.ttf");
+      }
+      input#image-button{
+        background: #ccc url('/static/img/refresh64.png') no-repeat top left;
+        width: 64px;
+        height: 64px;
+      }
+      html, body {
+        margin:0;
+        background-color:black;
+        color:white;
+        font-family:Alexis;
+      }
+      .wrapper {position:relative; width:100%; table-layout:fixed;}
+      html>body .wrapper {height:100%;}
+      .wrapperHeading {position:absolute;height:64px;width:100%;}
+      .wrapperHistory {position:absolute;top:68px;height:128px;left:0;right:0;border:4px solid white;margin:16px;overflow-x:auto;overflow-y:hidden;}
+      .wrapperBody {margin:16px;padding:16px;border:4px solid white;position:absolute;top:208px;bottom:0;left:0;right:0;overflow:auto;}
+      input[type=text],input[type=password] {
+        background-color:black;
+        color:white;
+        border:4px solid white;
+        font-family:Alexis;
+      }
+      button {
+      	background-color:black;
+      	border:4px solid white;
+      	display:inline-block;
+      	cursor:pointer;
+      	color:white;
+      	font-family:Alexis;
+      	font-size:48px;
+      	padding:16px 16px;
+      	text-decoration:none;
+      	text-shadow:4px 4px 4px gray;
+      }
+      .myButton:hover {
+      	background-color:#5cbf2a;
+      }
+      .myButton:active {
+      	position:relative;
+      	top:1px;
+      }
+
+
+    </style>
+   </head>
+   <body style="overflow:hidden;">
+     <div class="wrapper">
+       <div class="wrapperHeading">
+       <table style="width:100%;">
+       <tr style="height:64px;width:100%;">
+         <td style="height:64px;width:100%;">
+           <form id="commandLineForm" autocomplete="off">
+             <table cellpadding="0" cellspacing="0" style="margin:0px;padding:0px;width:100%;height:100%;">
+               <tr style="width:100%;">
+                 <td style="width:64px;height:64px;">
+                   <img style="width:64px;height:64px;" id="onlineIcon" src="/static/img/connection-offline.png"/>
+                 </td>
+                 <td>
+                   <input id="commandLine" type="text" name="commandLine" style="width:100%;height:64px;font-family:Alexis;font-size:60px;">
+                 </td>
+                 <td style="align:right;margin:0px;padding:0px;width:64px;">
+                   <input type="submit" id="image-button" value="">
+                 <td>
+               </tr>
+             </table>
+           </form>
+         </td>
+       </tr>
+       </table>
+       </div>
+       <div class="wrapperHistory" id="history">
+         <div id="historyInner"></div>
+       </div>
+       <div class="wrapperBody" id="mainDiv">
+       </div>
+     </div>
+     <script>
+     var ws;
+     rewriteLinks = function() {
+       //alert($("a[cmd]").length);
+       $("a[cmd]").click(function(event){
+         event.preventDefault();
+         //console.log($(this).attr("cmd"));
+         ws.send( JSON.stringify( {'eventName': 'cmd','data': $(this).attr("cmd") /*, 'block_id': $(this).closest('div[class="mbe"]').attr("id")*/} ) );
+         return false;
+       });
+
+
+       //$("#mainDiv form[cmd] button[type=submit]").button();
+       $("#mainDiv:last-child form[cmd]").on('submit', function(event) {
+         event.preventDefault();
+         var args = [$(this).attr("cmd")];
+         $("#mainDiv form[cmd] input").each(function(x, child){
+           if ( child.type == "text" || child.type == "password" ) {
+             args.push(child.value);
+           }
+         });
+         var cmd = "";
+         for (var i = 0; i < args.length; i++) { cmd += args[i] + " "; }
+         alert("rewrite args: " + cmd);
+         ws.send(JSON.stringify({'eventName': 'cmd','data': cmd }));
+         return false;
+       });
+
+     }
+     $(document).ready(function() {
+       function calculateAspectRatioFit(srcWidth, srcHeight, maxWidth, maxHeight) {
+
+           var ratio = Math.min(maxWidth / srcWidth, maxHeight / srcHeight);
+
+           return { width: srcWidth*ratio, height: srcHeight*ratio };
+        }
+       function getThumbnail(original) {
+         var canvas = document.createElement("canvas")
+
+         var newsize = calculateAspectRatioFit(original.width, original.height, 256-16, 128-16);
+         canvas.width = newsize.width
+         canvas.height = newsize.height
+
+         canvas.getContext("2d").drawImage
+           (original, 0, 0, canvas.width, canvas.height)
+         canvas.style.margin = "8px";
+         return canvas
+       }
+
+     var jsondata = {};
+     ws = new WebSocket("ws://localhost:8080/ws");
+     ws.onopen = function(e) {
+       $("#onlineIcon").attr("src", "/static/img/connection-online.png")
+       ws.send(JSON.stringify({'eventName': 'cmd', 'data': 'login'}));
+     }
+     ws.onclose = function(e) {
+       $("#onlineIcon").attr("src", "/static/img/connection-offline.png");
+     }
+     ws.onerror = function(e) {
+         alert("socket error: " + e.data);
+     };
+     var history_counter = 0;
+     ws.onmessage = function (e) {
+     //alert('got ' + e.data);
+     try {
+       var jsondata = $.parseJSON(e.data);
+       if (jsondata['eventName'] == 'status') {
+           //alert('jsondata[msg] == ' + jsondata['msg']);
+           //$('#statusDiv').append( jsondata['msg'] );
+           add_status_msg( jsondata['msg'], '');
+       }
+       else if (jsondata['eventName'] == 'inject') {
+           //console.log( 'injecting:  ' + jsondata['data'] );
+           // Check for existing ID and replace if exists
+           var $jdata = $(jsondata['data']);
+           var id = $(jsondata['data']).find("div").andSelf().filter("div:first").attr("id");
+           //alert(id);
+           //if ( $("#mainDiv").children("div[id='" + id + "']").length == 0 ) {
+             //$("#mainDiv").children("div").hide("slide", { direction: "left" }, 500);
+             if ( $("#mainDiv").children("div").length > 0 ) {
+               //alert($("#mainDiv").children("div").first().html());
+             html2canvas($("#mainDiv").children("div").first(), {
+                 onrendered: function(canvas) {
+                   //alert('inside');
+                   var thumbnail = getThumbnail(canvas);
+                   //alert($("#mainDiv").children("div").first());
+                   $('<div style="float:left;" id="history' + history_counter.toString() + '"><a href="#"></a></div>').appendTo("#historyInner");
+                   //$("#history div:last-child").children("a").append(thumbnail);
+                   $(thumbnail).appendTo("#history div div:last-child a:first-child");
+                   $("#mainDiv").children("div").appendTo('#history div div:last-child').hide();
+                   $("#history div div:last-child").children("a:first-child").click(function() {
+                       $("#mainDiv").empty();
+                       //alert($(this).parent().children("div").html());
+                       $(this).parent().children("div").appendTo('#mainDiv').show();
+                   });
+                   history_counter += 1;
+                   var innersize = 0;
+                   $("#history div:first-child div a").each( function(index, element) {
+                      innersize += $(element).width();
+                   });
+                   $("#historyInner").width(innersize);
+                   $("#history").animate({scrollLeft: innersize}, 100);
+                   //$("#history").append(thumbnail);
+                   //$("#mainDiv").empty();
+                   $("#mainDiv").html(jsondata['data']);
+                   rewriteLinks();
+                   //$(jsondata['data']).appendTo($("#mainDiv")).slideDown(3000);
+                 }
+             });
+
+             }
+             else { // if maindiv empty
+            //   alert('replacing');
+            //   $("#mainDiv").empty();
+            //   $(jsondata['data']).appendTo($("#mainDiv")).slideDown(3000);
+                 $("#mainDiv").html(jsondata['data']);
+                 rewriteLinks();
+             }
+             //$("#mainDiv").children("div").detach().appendTo('#');
+             //$("#mainDiv").append(jsondata['data']);
+             //$("#mainDiv").children("div").slideDown(2000);
+           //}
+           //else {
+            //  $("#mainDiv").children("div[id='" + id + "']").replaceWith( jsondata['data'] );
+           //}
+           //var d = $('#mainDiv');
+           //d.scrollTop(d.prop("scrollHeight"));
+           //$("#mainDiv").animate({ scrollTop: $('#mainDiv').prop("scrollHeight")}, 250);
+           //alert("injecting.");
+           //try {
+               //var d = $("#mainIframe")[0].contentWindow.document; // contentWindow works in IE7 and FF
+               //d.open(); // must open and close document object to start using it!
+               //d.close();
+               // now start doing normal jQuery:
+               //$("#mainDiv", d).append(jsondata['inject']);
+           //$("#mainDiv",$("#mainIframe").contents()).append(jsondata['data']);
+           //} catch(e) { alert("inject error: " + e.data); }
+       }
+       else if (jsondata['eventName'] == 'js_execute') {
+           console.log( 'evaluating: ' + jsondata['code'] );
+           eval(jsondata['code']);
+       }
+      } catch(e){alert("error: "+e.data);}
+      };
+
+       $('#commandLineForm').submit(function( event ) {
+       event.preventDefault();
+       if (ws) {
+         var $form = $( this ),
+            cmd = $form.find("input[name='commandLine']" ).val();
+       //alert(JSON.stringify({'cmd': cmd}));
+         try {
+           ws.send(JSON.stringify({'eventName': 'cmd', 'data': cmd}));
+         }
+         catch(err) {
+           alert(err.message);
+         }
+       }
+       });
+ });
+ </script>
+</html>
