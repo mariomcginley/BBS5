@@ -7,10 +7,9 @@
 * PyPy RPC Sandbox Adapter
 * Brython UI Widgets Library (CSS3/WebGL 2d/3d Layouts: Panel->Vector->Dock->Panel, Top/Left/Right/Bottom,Main,Preview , Grid)
 * CMS
-* Command-Line Parser w/ Dynamic Command List
+* MOO
 
 ## To be Completed:
-* Panels Objects bound to Brython UI Widgets
 
 ## Possible Panel Types:
 * -WebRTC Video-to-Video
