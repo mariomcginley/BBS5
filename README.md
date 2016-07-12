@@ -9,6 +9,9 @@
 * CMS
 * MOO
 
+OK, so the idea is the whole asycio/aiohttp system is programmable similar to ZOPE but the code and design is simplified.  The OrientDB database is accessed in a ACL partitioned manner through the PyPy Sandbox RPC adapter.  The websocket commands and html5 functionality is programmable like a MOO.  So in essence, it's a fully programmable Web System utilizing all the available libraries.
+
+
 ## To be Completed:
 
 ## Possible Panel Types:
