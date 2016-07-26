@@ -1,18 +1,20 @@
 # bbs5: BBS/CMS/MOO Hybrid
 # License: [http://www.gnu.org/licenses/agpl-3.0.en.html]
 # Author: Mario McGinley
-## To be Completed:
-* Migrate nonblocking.py (bulbs->asyncio) from pulsar to asyncio
-* OrientDB In-Memory DB -> Short-Term Memory Serializable / OrientDB ACL Long Term Memory DB
-* PyPy RPC Sandbox Adapter
-* Brython UI Widgets Library (CSS3/WebGL 2d/3d Layouts: Panel->Vector->Dock->Panel, Top/Left/Right/Bottom,Main,Preview , Grid)
-* CMS
-* MOO
 
-OK, so the idea is the whole asycio/aiohttp system is programmable similar to ZOPE but the code and design is simplified.  The OrientDB database is accessed in a ACL partitioned manner through the PyPy Sandbox RPC adapter.  The websocket commands and html5 functionality is programmable like a MOO.  So in essence, it's a fully programmable Web System utilizing all the available libraries.
+Asyncio/aiohttp based programmable web system.
+Jinja2 memory templates are extended to pull from OrientDB.
+Bulbflow library is monkeypatched for asyncio asynchronous DB requests to OrientDB over Rexster.
+Bulbflow library is monkeypatched for returning the REST Query Data over the RPC bridge to the PyPy Sandbox then the SandboxedBulbs monkeypatched library inside the sandbox reconstructs the REST Query Data internally and overrides the DB Object .save() method to talk back to the outer Bulbflow through a JSON Message Object.  The result is an internally held Bulbs object list inside the sandbox that saves back to the ACL partitioned outer Bulbs library.  This sandboxes both Python code execution and the database to the ACL.
+Web Objects are programmable objects similar to a MOO.
+uses wcDocker library to render collections of objects in Panels/Windows.
+Programmable Command Line Parser (from POO/MOOP).
+Objects are held in a Folder/File tree hierarchy then folders objects may be collected and rendered with a custom collector object.
+A WebRTC PBX-like exchange is exposed to the outside world for communication with people in a particular BBS.  A global directory of BBS's may index the total online population.  This makes for sort of a distributed cluster of mini-social-network type systems.
 
 
-## To be Completed:
+
+
 
 ## Possible Panel Types:
 * -WebRTC Video-to-Video
