@@ -10,7 +10,7 @@ Web Objects are programmable objects similar to a MOO.
 uses wcDocker library to render collections of objects in Panels/Windows.
 Programmable Command Line Parser (from POO/MOOP).
 Objects are held in a Folder/File tree hierarchy then folders objects may be collected and rendered with a custom collector object.
-A WebRTC PBX-like exchange is exposed to the outside world for communication with people in a particular BBS.  A global directory of BBS's may index the total online population.  This makes for sort of a distributed cluster of mini-social-network type systems.
+
 
 
 
