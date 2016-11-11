@@ -31,3 +31,4 @@ Objects are held in a Folder/File tree hierarchy then folders objects may be col
 * -ANSI Art (Pixi*js Renderer)
 * -Vector Art (?)
 * -3d Web Design: GLAM (https://tparisi.github.io/glam/#about)
+* -Door Games: Diplomacy (https://en.wikipedia.org/wiki/Diplomacy_(game))
