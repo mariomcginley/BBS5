@@ -4,7 +4,7 @@
 
 Generic Asyncio/aiohttp based programmable web system.
 Internals are exposed to frontend as programmable components.
-Current Stack: Asyncio/Aiohttp/Goblin/OrientDB In-Memory Redis/RabbitMQ alternative/OrientDB/Tinkerpop Rexster/Elastic Search
+Current Stack: Asyncio/Aiohttp/Goblin/OrientDB In-Memory alternative to Redis/OrientDB/Tinkerpop Rexster/Elastic Search
 (https://github.com/MagicStack/uvloop)
 Jinja2 memory templates are extended to pull from OrientDB.
 Goblin Query Data is sent over the RPC bridge to the PyPy Sandbox then reconstructed inside the sandbox internally and overrides the DB Object .save() method to talk back to the outer Goblin library through a JSON Message Object.  The result is an internally held Goblin object list inside the sandbox that saves back to the ACL partitioned outer Goblin library.  This sandboxes both Python code execution and the database to the ACL.
